@@ -10,20 +10,21 @@
 	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="js/bootstrap.js"></script>
 <script type="text/javascript">
-	var request = new XMLHttpRequest();
+	var searchRequest = new XMLHttpRequest();
+	var registerRequest = new XMLHttpRequest();
 	function searchFunction() {
-		request.open("POST",
+		searchRequest.open("POST",
 				"./UserSearchServlet?userName="
 						+ encodeURIComponent(document
 								.getElementById("userName").value), true);
-		request.onreadystatechange = searchProcess;
-		request.send(null);
+		searchRequest.onreadystatechange = searchProcess;
+		searchRequest.send(null);
 	}
 	function searchProcess() {
 		var table = document.getElementById("ajaxTab");
 		table.innerHTML = "";
-		if (request.readyState == 4 && request.status == 200) {
-			var object = eval('(' + request.responseText + ')');
+		if (searchRequest.readyState == 4 && searchRequest.status == 200) {
+			var object = eval('(' + searchRequest.responseText + ')');
 			var result = object.result;
 			for (var i = 0; i < result.length; i++) {
 				var row = table.insertRow(0);
@@ -36,6 +37,41 @@
 		}
 
 	}
+	function registerFunction() {
+		
+	    registerRequest.open("POST", "./UserRegisterServlet", true);
+	    registerRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	    var queryString = "userName="
+	        + encodeURIComponent(document.getElementById("registerName").value)
+	        + "&userAge="
+	        + encodeURIComponent(document.getElementById("registerAge").value)
+	        + "&userGender=" // "userGender=" 을 "&userGender=" 으로 변경
+	        + encodeURIComponent($('input[name=registerGender]:checked').val())
+	        + "&userEmail=" // "userEmail=" 을 "&userEmail=" 으로 변경
+	        + encodeURIComponent(document.getElementById("registerEmail").value);
+	    registerRequest.onreadystatechange = registerProcess;
+	    registerRequest.send(queryString); // queryString 을 send 메소드의 인자로 전달
+	}
+
+	function registerProcess() {
+		if (registerRequest.readyState == 4 && registerRequest.status == 200) {
+			var result = registerRequest.responseText;
+			if (result != 1) {
+				alert("등록에 실패했습니다.");
+			} else {
+				var userName = document.getElementById("userName");
+				var registerName = document.getElementById("registerName");
+				var registerAge = document.getElementById("registerAge");
+				var registerEmail = document.getElementById("registerEmail");
+				userName.value = "";
+				registerName.value = "";
+				registerAge.value = "";
+				registerEmail.value = "";
+				searchFunction();
+			}
+		}
+	}
+
 	window.onload = function() {
 		searchFunction();
 	}
@@ -100,21 +136,21 @@
 								<label class="btn btn-primary active"> <input
 									type="radio" name="registerGender" autocomplete="off"
 									value="남자" checked>남자
-								</label> <label class="btn btn-primary "> <input
-									type="radio" name="registerGender" autocomplete="off"
-									value="여자">여자
+								</label> <label class="btn btn-primary "> <input type="radio"
+									name="registerGender" autocomplete="off" value="여자">여자
 								</label>
 							</div>
 						</div>
 					</td>
 				</tr>
-					<tr>
+				<tr>
 					<td style="background-color: #fafafa; text-align: center;"><h5>이메일</h5></td>
 					<td><input class="form-control" type="text" id="registerEmail"
 						size="20"></td>
 				</tr>
 				<tr>
-<td colspan="2"><button class="btn btn-primary pull-right" onclick="registerFunction();" type="button">등록</button></td>
+					<td colspan="2"><button class="btn btn-primary pull-right"
+							onclick="registerFunction();" type="button">등록</button></td>
 				</tr>
 			</tbody>
 		</table>
